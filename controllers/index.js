@@ -1,6 +1,7 @@
-import { TwitterDL } from "twitter-downloader";
+import { TwitterDL } from "x-downloader";
 import Joi from "joi";
 import Axios from "axios";
+import { generateRandomNumbers } from "../utils/generateGuestToken.js";
 
 export class DownloadController {
   static async analyze(req, res) {
@@ -19,26 +20,13 @@ export class DownloadController {
         });
 
       const { query } = value;
+
       const twitterKey = process.env.TWITTER_AUTH_TOKEN;
 
-      const guestTokenRequest = await Axios(
-        "https://api.twitter.com/1.1/guest/activate.json",
-        {
-          method: "POST",
-          headers: {
-            Authorization: twitterKey,
-          },
-        }
-      );
-
-      if (guestTokenRequest.status !== 200)
-        return res.status(500).json({
-          message: "Could not get guest token",
-          success: false,
-          data: {},
-        });
-
-      let response = await TwitterDL(query);
+      let response = await TwitterDL(query, {
+        authorization: twitterKey,
+        guestToken: "1783742364979075302",
+      });
 
       if (response.status !== "success") {
         return res
