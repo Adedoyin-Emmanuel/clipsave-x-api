@@ -1,14 +1,15 @@
 import { TwitterDL } from "twitter-downloader";
 import Joi from "joi";
-import { Axios } from "axios";
+import Axios from "axios";
 
-  export async function analyze(req, res) {
+export class DownloadController {
+  static async analyze(req, res) {
     try {
       const requestSchema = Joi.object({
         query: Joi.string().required(),
       });
 
-      const { error, value } = requestSchema.validate(req.query);
+      const { error, value } = requestSchema.validate(req.body);
 
       if (error)
         return res.status(400).json({
@@ -18,7 +19,6 @@ import { Axios } from "axios";
         });
 
       const { query } = value;
-
       const twitterKey = process.env.TWITTER_AUTH_TOKEN;
 
       const guestTokenRequest = await Axios(
@@ -38,25 +38,19 @@ import { Axios } from "axios";
           data: {},
         });
 
-      let response = await TwitterDL(query, {
-        authorization: twitterKey,
-        guestToken: guestTokenRequest.data.guest_token,
-      });
+      let response = await TwitterDL(query);
 
       if (response.status !== "success") {
         return res
           .status(500)
           .json({ message: response.message, success: false, data: {} });
       }
-      return res.status(200).json(
-        {
-          message: "Analyze complete",
-          success: true,
-          extractor: "TwitterSDK",
-          data: { ...response.result },
-        },
-        { status: 200 }
-      );
+      return res.status(200).json({
+        message: "Analyze complete",
+        success: true,
+        extractor: "TwitterSDK",
+        data: { ...response.result },
+      });
     } catch (error) {
       console.log(error);
       return res
@@ -64,5 +58,4 @@ import { Axios } from "axios";
         .json({ message: error.message, success: false, data: {} });
     }
   }
-
-
+}

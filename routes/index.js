@@ -1,8 +1,8 @@
 import express from "express";
-import { analyze } from "../controllers";
+import { DownloadController } from "../controllers/index.js";
 
 const clipsaveTwitterRouter = express.Router();
 
-clipsaveTwitterRouter.use("/download", analyze);
+clipsaveTwitterRouter.post("/twitter", DownloadController.analyze);
 
 export { clipsaveTwitterRouter };
